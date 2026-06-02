@@ -1,0 +1,79 @@
+:root { --gold: #ffd34d; --ink: #0d1117; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: #11161f;
+  color: #e8e3d4;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+#wrap {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 12px 12px 28px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 22px;
+  letter-spacing: 1px;
+  margin: 10px 0 12px;
+  color: var(--gold);
+  text-shadow: 0 2px 0 #5a3f00;
+}
+h1 span { color: #9aa3ad; font-size: 13px; font-weight: normal; letter-spacing: 0; }
+
+#stage { position: relative; display: inline-block; }
+
+canvas {
+  background: #2c5226;
+  border: 3px solid #2b3340;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  touch-action: none;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,211,77,0.15);
+}
+
+#help { font-size: 13px; color: #c2c8d0; margin: 14px 0 4px; line-height: 1.7; }
+#help b { color: var(--gold); }
+#tag  { font-size: 11px; color: #6c7380; margin: 6px 0 0; }
+
+/* ---- Touch controls: hidden on desktop, shown on coarse pointers ---- */
+#touch { display: none; }
+
+#touch button {
+  font-size: 22px;
+  color: #fff;
+  background: rgba(20,26,36,0.72);
+  border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  width: 56px; height: 56px;
+  user-select: none;
+}
+#touch button:active { background: rgba(255,211,77,0.5); }
+
+#dpad {
+  position: absolute; left: 10px; bottom: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 4px;
+}
+#btn-up    { grid-column: 2; grid-row: 1; }
+#btn-left  { grid-column: 1; grid-row: 2; }
+#btn-right { grid-column: 3; grid-row: 2; }
+#btn-down  { grid-column: 2; grid-row: 3; }
+
+#actions {
+  position: absolute; right: 10px; bottom: 16px;
+  display: flex; gap: 14px; align-items: flex-end;
+}
+#actions #btn-a { width: 68px; height: 68px; font-size: 26px; background: rgba(180,40,40,0.6); }
+
+@media (pointer: coarse) { #touch { display: block; } }

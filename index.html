@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Martorell Quest · La Llegenda del Pont del Diable</title>
+  <meta name="description" content="Un joc d'aventures a l'estil Zelda pel mapa de Martorell." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="wrap">
+    <h1>MARTORELL QUEST <span>· La Llegenda del Pont del Diable</span></h1>
+
+    <div id="stage">
+      <canvas id="game" width="800" height="600"></canvas>
+
+      <!-- On-screen controls for touch devices -->
+      <div id="touch">
+        <div id="dpad">
+          <button id="btn-up"    aria-label="amunt">▲</button>
+          <button id="btn-left"  aria-label="esquerra">◀</button>
+          <button id="btn-right" aria-label="dreta">▶</button>
+          <button id="btn-down"  aria-label="avall">▼</button>
+        </div>
+        <div id="actions">
+          <button id="btn-b" aria-label="parlar">E</button>
+          <button id="btn-a" aria-label="espasa">⚔</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="help">Mover: WASD/flechas · Espada: J/Z/Espacio · Hablar: E · Idioma: L · Reiniciar: R</p>
+    <p id="tag">Un homenaje hecho a mano a Martorell y a The Legend of Zelda. No oficial.</p>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
