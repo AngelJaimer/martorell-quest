@@ -272,7 +272,7 @@ const LANDMARKS = [
     },
   },
   {
-    id: 'buenosaires', x: 18, y: 5, color: '#d8c39a', icon: 'house', building: { x: 17, y: 2, w: 3, h: 3 },
+    id: 'buenosaires', barri: true, x: 18, y: 5, color: '#d8c39a', icon: 'house', building: { x: 17, y: 2, w: 3, h: 3 },
     name: { es: 'Barrio de Buenos Aires', ca: 'Barri de Buenos Aires', en: 'Buenos Aires District' },
     lines: {
       es: ["El barrio de BUENOS AIRES creció con la gente que vino a trabajar a Martorell en los años 60 y 70.",
@@ -284,7 +284,7 @@ const LANDMARKS = [
     },
   },
   {
-    id: 'camifondo', x: 5, y: 7, color: '#cdbf9e', icon: 'house', building: { x: 4, y: 4, w: 3, h: 3 },
+    id: 'camifondo', barri: true, x: 5, y: 7, color: '#cdbf9e', icon: 'house', building: { x: 4, y: 4, w: 3, h: 3 },
     name: { es: 'Camí Fondo · Can Carreras', ca: 'Camí Fondo · Can Carreras', en: 'Camí Fondo · Can Carreras' },
     lines: {
       es: ["El CAMÍ FONDO es una antigua vía hundida entre campos que lleva al barrio de CAN CARRERAS.",
@@ -296,7 +296,7 @@ const LANDMARKS = [
     },
   },
   {
-    id: 'canbros', x: 37, y: 26, color: '#aeb4ba', icon: 'warehouse', building: { x: 36, y: 23, w: 4, h: 3 },
+    id: 'canbros', barri: true, x: 37, y: 26, color: '#aeb4ba', icon: 'warehouse', building: { x: 36, y: 23, w: 4, h: 3 },
     name: { es: 'El Pla · Polígono de Can Bros', ca: 'El Pla · Polígon de Can Bros', en: 'El Pla · Can Bros Estate' },
     lines: {
       es: ["EL PLA y el polígono de CAN BROS son el motor industrial de Martorell, junto a la SEAT.",
@@ -308,7 +308,7 @@ const LANDMARKS = [
     },
   },
   {
-    id: 'bobiles', x: 19, y: 34, color: '#b5764a', icon: 'kiln', building: { x: 18, y: 31, w: 3, h: 3 },
+    id: 'bobiles', barri: true, x: 19, y: 34, color: '#b5764a', icon: 'kiln', building: { x: 18, y: 31, w: 3, h: 3 },
     name: { es: 'La Sínia · Les Bòbiles', ca: 'La Sínia · Les Bòbiles', en: 'La Sínia · Les Bòbiles' },
     lines: {
       es: ["LA SÍNIA y LES BÒBILES bordean el río, donde antaño humeaban los hornos de ladrillo.",

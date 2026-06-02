@@ -440,10 +440,15 @@
       ctx.fillRect(ox + x*sx, oy + y*sy, Math.ceil(sx), Math.ceil(sy));
     }
     LANDMARKS.forEach(L => {
-      if (L.isGoal) ctx.fillStyle = '#ff5a3c';
-      else if (L.stone && !state.flags[L.id]) ctx.fillStyle = '#ffd34d';
-      else return;
-      ctx.fillRect(ox + L.x*sx - 1, oy + L.y*sy - 1, 3, 3);
+      let col, r = 1;
+      if (L.isGoal) col = '#ff5a3c';                              // the bridge
+      else if (L.stone && !state.flags[L.id]) col = '#ffd34d';    // stone to collect
+      else if (L.stone) col = '#9bd17a';                          // stone already taken
+      else if (L.barri) { col = '#c792ff'; r = 2; }               // the four neighborhoods: bigger + violet
+      else col = '#7fd4ff';                                       // other places of interest
+      const mx = ox + L.x*sx, my = oy + L.y*sy;
+      ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(mx - r - 1, my - r - 1, 2*r + 3, 2*r + 3);
+      ctx.fillStyle = col; ctx.fillRect(mx - r, my - r, 2*r + 1, 2*r + 1);
     });
     if (Math.floor(now() / 300) % 2) {
       ctx.fillStyle = '#fff';
