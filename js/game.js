@@ -31,7 +31,7 @@
   const lightBuf = document.createElement('canvas');
   lightBuf.width = VIEW_W; lightBuf.height = VIEW_H;
   const lctx = lightBuf.getContext('2d');
-  const NIGHT = 0.5;   // 0 = day, 1 = pitch black where unlit
+  const NIGHT = 0.28;  // darkness of unlit areas (0 = day, 1 = pitch black) — applied in lightingPass()
 
   /* ---------------- Static decorations ---------------- */
   const trees = [];
@@ -525,7 +525,7 @@
     // dawn-tinged darkness (slightly purple at the bottom, bluer up top)
     const grad = lctx.createLinearGradient(0, 0, 0, VIEW_H);
     grad.addColorStop(0, 'rgb(10,14,40)'); grad.addColorStop(1, 'rgb(24,14,34)');
-    lctx.fillStyle = grad; lctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    lctx.globalAlpha = NIGHT; lctx.fillStyle = grad; lctx.fillRect(0, 0, VIEW_W, VIEW_H); lctx.globalAlpha = 1;
 
     lctx.globalCompositeOperation = 'destination-out';
     const carve = (x, y, r, soft) => {
@@ -535,8 +535,8 @@
       g.addColorStop(1, 'rgba(0,0,0,0)');
       lctx.fillStyle = g; lctx.beginPath(); lctx.arc(x, y, r, 0, 7); lctx.fill();
     };
-    // player lantern
-    carve(player.x + 10 - cam.x, player.y + 12 - cam.y, 110, 0.95);
+    // player lantern (wider so roads/buildings read clearly at night)
+    carve(player.x + 10 - cam.x, player.y + 12 - cam.y, 170, 0.95);
     // lamps
     lamps.forEach(l => carve(l.lx - cam.x, l.ly - cam.y, 78, 1));
     // lit buildings
