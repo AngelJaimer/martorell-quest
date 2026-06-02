@@ -525,6 +525,7 @@
     // dawn-tinged darkness (slightly purple at the bottom, bluer up top)
     const grad = lctx.createLinearGradient(0, 0, 0, VIEW_H);
     grad.addColorStop(0, 'rgb(10,14,40)'); grad.addColorStop(1, 'rgb(24,14,34)');
+    lctx.clearRect(0, 0, VIEW_W, VIEW_H);  // must clear first: the buffer persists across frames, so a semi-transparent fill would otherwise accumulate back to opaque
     lctx.globalAlpha = NIGHT; lctx.fillStyle = grad; lctx.fillRect(0, 0, VIEW_W, VIEW_H); lctx.globalAlpha = 1;
 
     lctx.globalCompositeOperation = 'destination-out';
