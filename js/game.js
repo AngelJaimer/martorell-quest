@@ -89,7 +89,7 @@
   const enemies = [];
   (function spawn() {
     [[45,14],[43,12],[49,8],[44,18],[46,22],[42,9],[50,13],
-     [33,22],[20,26],[11,9]].forEach(([tx, ty], i) => {
+     [33,22],[20,28],[11,9]].forEach(([tx, ty], i) => {
       enemies.push({ x: tx * TILE, y: ty * TILE, w: 22, h: 22, hp: 2,
         dir: Math.random() * Math.PI * 2, speed: 0.9 + Math.random() * 0.4,
         wob: i, dead: false, hurt: 0, seed: i * 3.1 });

@@ -296,7 +296,7 @@ const LANDMARKS = [
     },
   },
   {
-    id: 'canbros', barri: true, x: 37, y: 26, color: '#aeb4ba', icon: 'warehouse', building: { x: 36, y: 23, w: 4, h: 3 },
+    id: 'canbros', barri: true, x: 37, y: 30, color: '#aeb4ba', icon: 'warehouse', building: { x: 36, y: 27, w: 4, h: 3 },
     name: { es: 'El Pla · Polígono de Can Bros', ca: 'El Pla · Polígon de Can Bros', en: 'El Pla · Can Bros Estate' },
     lines: {
       es: ["EL PLA y el polígono de CAN BROS son el motor industrial de Martorell, junto a la SEAT.",
@@ -347,8 +347,8 @@ const ROOFS = {
 const LAMPS = [
   [21, 12], [30, 12], [21, 17], [30, 17],   // around the Plaça de la Vila
   [12, 15], [18, 15], [34, 15], [40, 15],   // along the main east–west road
-  [23, 22], [23, 28], [26, 24], [26, 31],   // down the vertical road
-  [18, 6], [5, 12], [34, 26], [21, 34],     // out in the barris
+  [23, 22], [23, 28], [14, 30], [26, 31],   // vertical road + south arterial
+  [18, 6], [5, 12], [37, 32], [21, 34],     // out in the barris
 ];
 
 /* ---------------------------------------------------------------------
@@ -368,10 +368,14 @@ function buildMap() {
   }
   rect(56, 0, 4, MAP_H, 'M');                               // Castellbisbal hills
 
-  // Anoia joining from the south-west.
-  for (let x = 0; x < 47; x++) {
-    const cy = 38 + Math.round(1.5 * Math.sin(x / 5));
-    set(x, cy, 'W'); set(x, cy + 1, 'W'); set(x, cy - 1, '#'); set(x, cy + 2, '#');
+  // Anoia: cuts west->east across the middle, splitting the town into a north
+  // bank (centre + La Vila + Buenos Aires / Cami Fondo) and a south bank
+  // (Can Bros, Les Bobiles, SEAT, the Parc). Joins the Llobregat at the east.
+  // Crossable ONLY at the footbridges stamped below.
+  for (let x = 0; x <= 47; x++) {
+    const cy = 24 + Math.round(1.5 * Math.sin(x / 8));
+    set(x, cy - 1, '#'); set(x, cy + 2, '#');
+    set(x, cy, 'W'); set(x, cy + 1, 'W');
   }
 
   // Roads.
@@ -386,16 +390,21 @@ function buildMap() {
   for (let x = 18; x <= 24; x++)  set(x, 6, 'R');
   for (let y = 7;  y <= 16; y++)  set(5, y, 'R');                       // Camí Fondo (sunken NW lane)
   set(6, 16, 'R');
-  for (let x = 31; x <= 37; x++)  set(x, 26, 'R');                      // El Pla / Can Bros (SE)
+  for (let x = 12; x <= 37; x++)  set(x, 30, 'R');                      // south arterial: Parc <-> bridges <-> Can Bros
   for (let x = 19; x <= 24; x++)  set(x, 34, 'R');                      // La Sínia / Les Bòbiles (S)
 
   rect(22, 12, 8, 6, 'S');                                  // Plaça de la Vila
 
-  for (let x = 44; x <= 53; x++) set(x, 10, '~');           // Pont del Diable
+  for (let x = 44; x <= 53; x++) set(x, 10, '~');           // Pont del Diable (over the Llobregat, to Sant Genis)
   set(46, 9, '~'); set(46, 11, '~');
+  // Footbridges over the Anoia, aligned with the N-S road spines (x24-25, x31).
+  [24, 25, 31].forEach(bx => {
+    const cy = 24 + Math.round(1.5 * Math.sin(bx / 8));
+    for (let yy = cy - 1; yy <= cy + 2; yy++) set(bx, yy, '~');
+  });
 
-  [[14,26],[16,27],[12,28],[38,24],[40,22],[36,26],[9,12],[11,10],[42,14],[20,30],
-   [15,3],[3,8],[40,27],[16,30],[33,6],[38,20]]
+  [[9,7],[11,11],[15,3],[33,6],[42,13],[3,10],[35,12],[40,20],
+   [12,27],[40,28],[16,37],[22,41],[34,37],[8,38],[42,32],[20,42]]
     .forEach(([x, y]) => set(x, y, 'T'));
 
   rect(6, 30, 10, 6, 'P');                                  // Parc de la Vila
