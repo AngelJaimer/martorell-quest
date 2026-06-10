@@ -31,6 +31,13 @@ const ART3D = (() => {
       for (let yy = y + 3; yy < y + ph; yy += 3) { g.beginPath(); g.moveTo(x, yy); g.lineTo(x + w, yy); g.stroke(); }
     }
     g.strokeStyle = opts.frame || '#f0ead8'; g.lineWidth = 2; g.strokeRect(x, y, w, h);
+    if (opts.awning) {                                                     // tendal over the window
+      const col = rnd() < 0.5 ? '#3c6e58' : '#a8503c';
+      g.fillStyle = col; g.fillRect(x - 5, y - 11, w + 10, 11);
+      g.fillStyle = 'rgba(245,242,230,.85)';
+      for (let ax = x - 5 + 4; ax < x + w + 5; ax += 9) g.fillRect(ax, y - 11, 4, 11);
+      g.fillStyle = col; g.fillRect(x - 5, y - 2, w + 10, 2);
+    }
   }
 
   function buildFacade(def) {
@@ -71,6 +78,30 @@ const ART3D = (() => {
       g.fillStyle = 'rgba(255,255,255,.16)';
       for (let y = hpx - 64; y < hpx; y += 8) { g.fillRect(32, y, 66, 2); g.fillRect(158, y, 66, 2); }
       if (def.sign) signBand(hpx * 0.06);
+      return { lit: c, dark: darken(c) };
+    } else if (def.mat === 'cultural') {
+      // Centre Cultural (1995): pale civic body, long glazing, glass entrance
+      g.fillStyle = shade(base, 0.96);
+      for (let i = 0; i < 70; i++) g.fillRect(rnd() * MODULE_PX, rnd() * hpx, 3, 2);
+      g.fillStyle = '#26303d'; g.fillRect(8, hpx * 0.32, MODULE_PX - 16, 30);
+      g.fillStyle = 'rgba(150,190,220,.3)'; g.fillRect(10, hpx * 0.32 + 3, MODULE_PX / 2, 24);
+      g.strokeStyle = '#d8d2c4'; g.lineWidth = 2;
+      for (let x = 8; x <= MODULE_PX - 8; x += 30) { g.beginPath(); g.moveTo(x, hpx * 0.32); g.lineTo(x, hpx * 0.32 + 30); g.stroke(); }
+      g.fillStyle = '#9a4a3a'; g.fillRect(MODULE_PX / 2 - 46, hpx - 66, 92, 8);      // canopy
+      g.fillStyle = '#1c242e'; g.fillRect(MODULE_PX / 2 - 38, hpx - 58, 76, 58);     // glass doors
+      g.fillStyle = 'rgba(150,190,220,.35)'; g.fillRect(MODULE_PX / 2 - 34, hpx - 54, 30, 50);
+      g.strokeStyle = '#aab2b8'; g.strokeRect(MODULE_PX / 2 - 38, hpx - 58, 38, 58);
+      g.strokeRect(MODULE_PX / 2, hpx - 58, 38, 58);
+      if (def.sign) signBand(hpx - 84);
+      g.fillStyle = shade(base, 0.8); g.fillRect(0, 0, MODULE_PX, 4);
+      return { lit: c, dark: darken(c) };
+    } else if (def.mat === 'panel') {
+      // one of the five coloured roof panels crowning the Centre Cultural
+      g.fillStyle = base; g.fillRect(0, 0, MODULE_PX, hpx);
+      g.fillStyle = 'rgba(255,255,255,.16)';
+      for (let x = 0; x < MODULE_PX; x += 26) g.fillRect(x, 0, 10, hpx);
+      g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(0, hpx - 12, MODULE_PX, 12);
+      g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(0, 0, MODULE_PX, 5);
       return { lit: c, dark: darken(c) };
     } else if (def.mat === 'obra') {
       // tanca d'obra: white site-fence panels, blue rails, works notice
@@ -148,7 +179,7 @@ const ART3D = (() => {
         }
         for (let i = 0; i < 3; i++) {
           const x = 26 + i * 82;
-          windowAt(g, x, y, 34, floorPx - 30, { persiana: true });
+          windowAt(g, x, y, 34, floorPx - 30, { persiana: true, awning: rnd() < 0.2 });
           if (def.mat === 'bloc') {                     // light aluminium balcony rails
             g.fillStyle = 'rgba(225,228,230,.95)'; g.fillRect(x - 8, y + floorPx - 34, 50, 3);
             for (let bx = x - 8; bx <= x + 42; bx += 5) g.fillRect(bx, y + floorPx - 34, 2, 12);
@@ -189,8 +220,13 @@ const ART3D = (() => {
       for (let x = 0; x < MODULE_PX; x += 16) g.fillRect(x, hpx - 12, 1, 12);
     }
     if (def.sign) signBand(gyy + 1);
-    // top cornice
-    g.fillStyle = shade(base, 0.8); g.fillRect(0, 0, MODULE_PX, 4);
+    // top edge: terracotta tile rim on rowhouses, plain cornice elsewhere
+    if (def.socle) {
+      g.fillStyle = '#9c5535'; g.fillRect(0, 0, MODULE_PX, 7);
+      g.fillStyle = 'rgba(0,0,0,.2)';
+      for (let x = 0; x < MODULE_PX; x += 10) g.fillRect(x, 0, 2, 7);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(0, 7, MODULE_PX, 2);
+    } else { g.fillStyle = shade(base, 0.8); g.fillRect(0, 0, MODULE_PX, 4); }
     return { lit: c, dark: darken(c) };
   }
 
@@ -220,8 +256,8 @@ const ART3D = (() => {
       const yy = h * 0.9 + Math.sin(x * 0.013) * 9 + Math.sin(x * 0.041) * 5;
       g.fillRect(x, yy, 7, h - yy);
     }
-    // Montserrat, NW of town: the unmistakable serrated profile
-    const mX = w * 0.68, mW = 330;
+    // Montserrat, NW of town (azimuth ≈ 315° → 0.625 of the panorama)
+    const mX = w * 0.625, mW = 330;
     g.fillStyle = '#473a55';
     g.beginPath(); g.moveTo(mX - mW / 2, h * 0.9);
     const teeth = [0.05,0.32,0.12,0.55,0.30,0.72,0.45,0.95,0.52,0.78,0.60,1.0,0.68,0.62,0.78,0.85,0.88,0.5,1.0,0.0];
@@ -317,6 +353,20 @@ const ART3D = (() => {
     g.beginPath(); g.moveTo(w * 0.3, h * 0.65); g.lineTo(w * 0.18, h * 0.3); g.lineTo(w * 0.26, h * 0.27); g.lineTo(w * 0.38, h * 0.6); g.fill();
     g.fillStyle = '#2c2f33'; g.fillRect(w * 0.44, h * 0.36, w * 0.26, h * 0.1);   // seat
     g.fillStyle = '#666'; g.fillRect(w * 0.16, h * 0.24, 12, 3);          // handlebar
+  });
+  sprites.taula = sprite(110, 130, (g, w, h) => {    // taula de terrassa amb para-sol
+    g.fillStyle = '#e8e2d0';
+    g.beginPath(); g.moveTo(w / 2, 4); g.lineTo(6, h * 0.34); g.lineTo(w - 6, h * 0.34); g.fill();
+    g.fillStyle = '#a8503c';
+    for (let i = 0; i < 3; i++) {
+      g.beginPath(); g.moveTo(w / 2, 6); g.lineTo(14 + i * 34, h * 0.33); g.lineTo(24 + i * 34, h * 0.33); g.fill();
+    }
+    g.fillStyle = '#5a5e62'; g.fillRect(w / 2 - 2, h * 0.34, 4, h * 0.42);
+    ell(g, w / 2, h * 0.62, 26, 8, '#d8d4c8');                              // table top
+    g.fillStyle = '#5a5e62'; g.fillRect(w / 2 - 2, h * 0.66, 4, h * 0.3);
+    g.fillStyle = '#3c6e58';                                                // chairs
+    g.fillRect(10, h * 0.66, 16, 5); g.fillRect(10, h * 0.71, 3, h * 0.26);
+    g.fillRect(w - 26, h * 0.66, 16, 5); g.fillRect(w - 13, h * 0.71, 3, h * 0.26);
   });
   sprites.paperera = sprite(36, 80, (g, w, h) => {
     g.fillStyle = '#3c4248'; g.fillRect(w / 2 - 2, h * 0.45, 4, h * 0.55);

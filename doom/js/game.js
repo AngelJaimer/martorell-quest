@@ -103,6 +103,9 @@
     die: () => { tone(180, 40, 0.5, 'sawtooth', 0.4); noise(0.3, 0.3, 700, 0.1); },
     pick: () => { tone(660, 990, 0.09, 'square', 0.25); tone(990, 1320, 0.1, 'square', 0.2, 0.08); },
     key: () => { for (let i = 0; i < 4; i++) tone(523 * Math.pow(1.25, i), 523 * Math.pow(1.25, i), 0.16, 'triangle', 0.3, i * 0.13); },
+    falciot: () => { for (let i = 0; i < 3; i++) tone(3400 + Math.random() * 800, 2600, 0.07, 'sine', 0.06, i * 0.1 + Math.random() * 0.05); },
+    step: () => noise(0.045, 0.1, 600),
+    bellFar: () => { tone(415, 410, 1.6, 'sine', 0.08); tone(830, 820, 0.9, 'sine', 0.03, 0.02); },
     bell: () => { for (let i = 0; i < 3; i++) { tone(311, 308, 1.1, 'sine', 0.4, i * 0.7); tone(622, 615, 0.7, 'sine', 0.15, i * 0.7); } },
     roar: () => { tone(70, 30, 1.1, 'sawtooth', 0.6); noise(0.8, 0.4, 400, 0.1); },
     fire: () => noise(0.18, 0.35, 800),
@@ -191,6 +194,7 @@
 
   /* ---------------- input ---------------- */
   addEventListener('keydown', e => {
+    if (e.repeat) { keys[e.code] = true; return; }
     keys[e.code] = true;
     if (e.code === 'KeyL') { lang = LANGS[(LANGS.indexOf(lang) + 1) % 3]; }
     if (e.code === 'KeyR' && state !== 'menu') { reset(); state = 'play'; }
@@ -205,6 +209,7 @@
   });
   addEventListener('keyup', e => keys[e.code] = false);
   canvas.addEventListener('click', () => {
+    if (TOUCH.on && Date.now() - TOUCH.recent < 800) return;
     audio();
     if (state === 'menu') startGame();
     else if (state === 'play') {
@@ -215,8 +220,55 @@
   addEventListener('mousemove', e => {
     if (state === 'play' && document.pointerLockElement === canvas) P.a += e.movementX * 0.0026;
   });
-  function startGame() { state = 'play'; canvas.requestPointerLock && canvas.requestPointerLock(); }
+  function startGame() {
+    state = 'play';
+    if (!TOUCH.on && canvas.requestPointerLock) canvas.requestPointerLock();
+  }
   function switchW(i) { if (P.wpns[i]) { P.wi = i; P.cd = Math.max(P.cd, 0.25); } }
+
+  /* ---------------- touch controls ---------------- */
+  const TOUCH = { on: typeof window !== 'undefined' && 'ontouchstart' in window, fw: 0, st: 0, recent: 0 };
+  if (TOUCH.on) {
+    const ui = document.getElementById('touchui');
+    if (ui) ui.hidden = false;
+    let moveId = null, lookId = null, mx0 = 0, my0 = 0, lx = 0;
+    canvas.addEventListener('touchstart', e => {
+      audio(); TOUCH.recent = Date.now();
+      if (state === 'menu') { startGame(); e.preventDefault(); return; }
+      const r = canvas.getBoundingClientRect();
+      for (const t of e.changedTouches) {
+        if ((t.clientX - r.left) / r.width < 0.45 && moveId === null) { moveId = t.identifier; mx0 = t.clientX; my0 = t.clientY; }
+        else if (lookId === null) { lookId = t.identifier; lx = t.clientX; }
+      }
+      e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === moveId) {
+          TOUCH.st = Math.max(-1, Math.min(1, (t.clientX - mx0) / 50));
+          TOUCH.fw = Math.max(-1, Math.min(1, (my0 - t.clientY) / 50));
+        } else if (t.identifier === lookId) { P.a += (t.clientX - lx) * 0.008; lx = t.clientX; }
+      }
+      e.preventDefault();
+    }, { passive: false });
+    const endT = e => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === moveId) { moveId = null; TOUCH.fw = TOUCH.st = 0; }
+        if (t.identifier === lookId) lookId = null;
+      }
+    };
+    canvas.addEventListener('touchend', endT);
+    canvas.addEventListener('touchcancel', endT);
+    const btn = (id, down, up) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('touchstart', e => { audio(); TOUCH.recent = Date.now(); down(); e.preventDefault(); }, { passive: false });
+      if (up) el.addEventListener('touchend', e => { up(); e.preventDefault(); }, { passive: false });
+    };
+    btn('t-fire', () => { if (state === 'menu') startGame(); else keys.Space = true; }, () => keys.Space = false);
+    btn('t-wpn', () => { for (let i = 1; i <= 3; i++) { const w = (P.wi + i) % 3; if (P.wpns[w]) { switchW(w); break; } } });
+    btn('t-map', () => { showMap = !showMap; });
+  }
 
   /* ---------------- combat ---------------- */
   function shoot() {
@@ -382,6 +434,7 @@
         case 'bins': spr = ART3D.sprites.bins; wM = 3.4; hM = 1.7; break;
         case 'moto': spr = ART3D.sprites.moto; wM = 2.0; hM = 1.45; break;
         case 'paperera': spr = ART3D.sprites.paperera; wM = 0.55; hM = 1.2; break;
+        case 'taula': spr = ART3D.sprites.taula; wM = 2.3; hM = 2.7; break;
       }
       out.push({ x: pr.x, y: pr.y, spr, wM, hM, zM: 0 });
     }
@@ -545,25 +598,39 @@
   }
 
   /* ---------------- main loop ---------------- */
-  let last = 0;
+  let last = 0, stepT = 0, ambT = 4, perfAcc = 0, perfN = 0, lowQ = false;
   function frame(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0.016);
     last = ts; time += dt;
 
     if (state === 'play') {
+      // adaptive resolution for slower machines
+      if (!lowQ) {
+        perfAcc += dt; perfN++;
+        if (perfN >= 180) {
+          if (perfAcc / perfN > 0.045) { ENGINE.setQuality(0.7); lowQ = true; }
+          perfAcc = 0; perfN = 0;
+        }
+      }
       // movement
-      const fw = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
-      const st = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+      let fw = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) + TOUCH.fw;
+      let st = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + TOUCH.st;
+      fw = Math.max(-1, Math.min(1, fw)); st = Math.max(-1, Math.min(1, st));
       if (keys.ArrowLeft) P.a -= 2.6 * dt;
       if (keys.ArrowRight) P.a += 2.6 * dt;
       const sp = 5.6 * dt;
-      if (fw || st) {
+      if (Math.abs(fw) > 0.08 || Math.abs(st) > 0.08) {
         const n = Math.hypot(fw, st);
         const mx = (Math.cos(P.a) * fw / n + Math.cos(P.a + Math.PI / 2) * st / n) * sp;
         const my = (Math.sin(P.a) * fw / n + Math.sin(P.a + Math.PI / 2) * st / n) * sp;
         tryMove(P, mx, my);
         P.bobT += dt;
+        stepT -= dt;
+        if (stepT <= 0) { stepT = 0.38; SFX.step(); }
       }
+      // dusk ambience: falciots over the rooftops, a far-off bell
+      ambT -= dt;
+      if (ambT <= 0) { ambT = 3 + Math.random() * 6; (Math.random() < 0.88 ? SFX.falciot : SFX.bellFar)(); }
       P.cd -= dt; P.fire = Math.max(0, P.fire - dt * 5);
       if (keys.Space) shoot();
       updEnemies(dt); updShots(dt); updPickups();

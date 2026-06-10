@@ -6,26 +6,45 @@
 'use strict';
 
 const ENGINE = (() => {
-  const RW = 480, RH = 300;          // internal resolution
   const FOV = 1.15;                  // ~66°
-  const PROJ = (RW / 2) / Math.tan(FOV / 2);
-  const HOR = RH / 2;                // horizon row
   const EYE = 1.7;                   // eye height (m)
   const FOG = 230, FOGC = [232, 163, 92];   // dusk haze
   const MAXD = 270, MAXHITS = 8;
 
-  let buf, bg, fimg, fdata, textures, sky, pal, zbuf;
+  let RW, RH, PROJ, HOR;             // internal resolution (adaptive)
+  let buf, bg, fimg, fdata, textures, sky, pal, zbuf, lightG, fogStyles;
 
-  function init() {
-    buf = ART3D.cv(RW, RH); bg = buf.getContext('2d');
-    bg.imageSmoothingEnabled = false;
+  function setQuality(q) {
+    RW = Math.round(480 * q); RH = Math.round(300 * q);
+    PROJ = (RW / 2) / Math.tan(FOV / 2);
+    HOR = (RH / 2) | 0;
+    buf.width = RW; buf.height = RH;
+    bg = buf.getContext('2d'); bg.imageSmoothingEnabled = false;
     fimg = bg.createImageData(RW, RH - HOR);
     fdata = fimg.data;
     for (let i = 3; i < fdata.length; i += 4) fdata[i] = 255;
+    zbuf = new Float32Array(RW);
+  }
+
+  function init() {
+    buf = ART3D.cv(4, 4);
+    setQuality(1);
     textures = MAP.types.map(t => t ? ART3D.buildFacade(t) : null);
     sky = ART3D.buildSky();
     pal = ART3D.floorPalette();
-    zbuf = new Float32Array(RW);
+    fogStyles = Array.from({ length: 21 }, (_, i) =>
+      `rgba(${FOGC[0]},${FOGC[1]},${FOGC[2]},${(i / 20).toFixed(2)})`);
+    // static warm light pools under the street lamps
+    lightG = new Uint8Array(MAP.W * MAP.H);
+    for (const p of MAP.props) {
+      if (p.kind !== 'lamp') continue;
+      for (let dy = -7; dy <= 7; dy++) for (let dx = -7; dx <= 7; dx++) {
+        const x = (p.x | 0) + dx, y = (p.y | 0) + dy;
+        if (x < 0 || y < 0 || x >= MAP.W || y >= MAP.H) continue;
+        const d = Math.hypot(dx, dy) / 7;
+        if (d < 1) lightG[y * MAP.W + x] = Math.min(255, lightG[y * MAP.W + x] + (1 - d) * (1 - d) * 235);
+      }
+    }
   }
 
   /* ---- generic DDA used by render, hitscan & line-of-sight ---- */
@@ -71,14 +90,19 @@ const ENGINE = (() => {
       let o = y * RW * 4;
       for (let x = 0; x < RW; x++) {
         const ix = fx | 0, iy = fy | 0;
-        let c;
+        let c, lv = 0;
         if (ix >= 0 && iy >= 0 && ix < MAP.W && iy < MAP.H) {
-          let ft = MAP.floor[iy * MAP.W + ix];
+          const ii = iy * MAP.W + ix;
+          let ft = MAP.floor[ii];
           if (ft === 9) ft = (ix & 1) ? 7 : 1;        // zebra stripes (E-W road)
           else if (ft === 10) ft = (iy & 1) ? 7 : 1;  // zebra stripes (N-S road)
           c = pal[ft * 4 + (((ix * 0x9E37 ^ iy * 0x85EB) >> 3) & 3)];
+          lv = lightG[ii];
         } else c = pal[0];
-        fdata[o] = c[0] * nf + fr; fdata[o + 1] = c[1] * nf + fg; fdata[o + 2] = c[2] * nf + fb;
+        // dusk haze + warm lamplight pools
+        fdata[o] = c[0] * nf + fr + lv * 0.42;
+        fdata[o + 1] = c[1] * nf + fg + lv * 0.28;
+        fdata[o + 2] = c[2] * nf + fb + lv * 0.07;
         o += 4; fx += stx; fy += sty;
       }
     }
@@ -121,7 +145,7 @@ const ENGINE = (() => {
         bg.drawImage(tex, su, 0, 1, Math.max(1, sh), x, top, 1, yEnd - top);
         const fog = Math.min(0.88, d / FOG);
         if (fog > 0.03) {
-          bg.fillStyle = `rgba(${FOGC[0]},${FOGC[1]},${FOGC[2]},${fog.toFixed(2)})`;
+          bg.fillStyle = fogStyles[(fog * 20) | 0];
           bg.fillRect(x, top, 1, yEnd - top);
         }
         clipTop = Math.min(clipTop, top);
@@ -166,5 +190,5 @@ const ENGINE = (() => {
     return buf;
   }
 
-  return { init, render, wallDist, RW, RH, PROJ, HOR, EYE, FOG };
+  return { init, render, wallDist, setQuality, EYE, FOG };
 })();

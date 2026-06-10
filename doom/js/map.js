@@ -61,6 +61,8 @@ const MAP = (() => {
     { name: "C. de St. Llorenç d'Hortons", pts: [[412,22],[412,228]],  w: 6, sw: 2.5 },
     { name: 'C. de Castellví de Rosanes',  pts: [[484,22],[484,228]],  w: 6, sw: 2.5 },
     { name: 'Rbla. de les Bòbiles',        pts: [[546,20],[546,236]],  w: 10, sw: 3, rambla: true },
+    // the promenade that ends at Pl. de les Cultures / Centre Cultural
+    { name: 'Pg. de Catalunya',            pts: [[372,196],[372,268]], w: 6, sw: 4, trees: true },
     // ── the avenue that climbs the slope between the barris ──
     { name: 'Av. Fèlix Duran i Cañameras', pts: [[252,192],[252,422]], w: 9, sw: 3.5, trees: true },
     // ── Barri de Buenos Aires (SW): the 1962 polígon rows ──
@@ -81,6 +83,7 @@ const MAP = (() => {
     { x0: 24,  y0: 196, x1: 250, y1: 232 },     // grassy slope below Camí Fondo
     { x0: 256, y0: 232, x1: 262, y1: 420 },     // verge along Av. FDiC
     { x0: 296, y0: 132, x1: 336, y1: 188 },     // jardins del Camí Fondo
+    { x0: 300, y0: 252, x1: 334, y1: 308 },     // the park beside Pl. de les Cultures
   ];
 
   // 1960s polígon slabs: painted render in light warm tones + slab accents,
@@ -96,11 +99,17 @@ const MAP = (() => {
   // — landmarks —
   // Mercat de Les Bòbiles: brick hall, mid-remodelling (the real works run to 2026)
   B(492, 200, 540, 234, { mat: 'brick', c: '#b06a45', h: 8, nowin: true, sign: 'MERCAT MUNICIPAL · LES BÒBILES' });
+  // (the Centre Cultural is stamped after the woods are rasterised — see below —
+  //  since its real site is the clearing between the two barris)
   // Crist Salvador (1988): modern brick parish church on c. Pompeu Fabra
   B(80, 312, 136, 338,  { mat: 'church', c: '#b06a45', h: 9 });
   B(136, 312, 144, 320, { mat: 'church', c: '#a86040', h: 13, tower: true });       // campanar
   B(206, 238, 244, 290, { mat: 'stucco', c: '#e7e0c6', h: 9, sign: 'IES POMPEU FABRA' });
   const PAV = { x0: 206, y0: 300, x1: 244, y1: 352 };                               // pavelló
+  // el bar de la plaça, with its terrace on Pl. de Pompeu Fabra
+  B(152, 316, 172, 328, { mat: 'stucco', c: '#d9b894', h: 6, shops: true, sign: 'BAR DE LA PLAÇA' });
+  // l'ascensor de Buenos Aires (the real municipal lift project on the slope)
+  B(24, 296, 30, 304, { mat: 'metal', c: '#8aa0b0', h: 12 });
 
   // ---- programmatic housing fill ------------------------------------
   const cfBands = [[36, 60], [78, 118], [140, 182]];
@@ -170,6 +179,16 @@ const MAP = (() => {
   }
   for (const s of STREETS) paintStreet(s);
 
+  // Centre Cultural grounds, at the end of Pg. de Catalunya:
+  // green clearing, paved apron, Pl. de les Cultures + park in front, gardens behind
+  for (let y = 240; y < 344; y++)
+    for (let x = 296; x < 456; x++)
+      if (floor[y * W + x] === F.DIRT) floor[y * W + x] = F.GRASS;
+  fillRect(floor, 336, 294, 412, 322, F.SIDEWALK);
+  fillRect(floor, 336, 260, 412, 294, F.PLAZA_OLD);
+  fillRect(floor, 340, 322, 408, 338, F.GRASS);
+  fillRect(floor, 262, 294, 344, 308, F.SIDEWALK);   // path in from Av. FDiC
+
   // zebra crossings (passos de vianants) at every proper crossing
   const segs = STREETS.filter(s => !s.ped);
   for (const h of segs) for (const v of segs) {
@@ -225,6 +244,24 @@ const MAP = (() => {
   fillRect(wall, 24, 18, 226, 196, pineT);         // bosc NW, slope to la Vila
   fillRect(wall, 262, 240, 552, 426, pineT);       // hillside between the barris
 
+  // …and the clearing in it where the Centre Cultural really stands,
+  // at the south end of Pg. de Catalunya (near Av. Mancomunitats Comarcals)
+  fillRect(wall, 296, 240, 456, 344, 0);
+  fillRect(wall, 262, 294, 300, 310, 0);           // the path through to Av. FDiC
+  // Centre Cultural (1995, Bargués & Isart): pale civic body with the
+  // library + auditorium, crowned by its five huge coloured roof panels —
+  // modelled as taller slabs rising behind the facade
+  fillRect(wall, 344, 296, 404, 318, T({ mat: 'cultural', c: '#ddd6c4', h: 10, sign: 'CENTRE CULTURAL' }));
+  ['#c43a2e', '#2f5fae', '#e0b32a', '#3c8a4e', '#7a4a86'].forEach((pc, i) =>
+    fillRect(wall, 344 + i * 12, 314, 344 + (i + 1) * 12, 318, T({ mat: 'panel', c: pc, h: 16.5 })));
+  // low hedge around the gardens behind (gap on the east corner)
+  const hedgeT = T({ mat: 'fence', c: '#46603f', h: 1.0 });
+  for (let x = 340; x < 408; x++) wall[338 * W + x] = wall[338 * W + x] || hedgeT;
+  for (let y = 322; y < 338; y++) {
+    wall[y * W + 340] = wall[y * W + 340] || hedgeT;
+    if (y < 326 || y > 332) wall[y * W + 407] = wall[y * W + 407] || hedgeT;
+  }
+
   // ---- props ---------------------------------------------------------
   const props = [];
   const cellFree = (x, y, m = 1) => {
@@ -273,6 +310,21 @@ const MAP = (() => {
       const x = pk.x0 + rnd() * (pk.x1 - pk.x0), y = pk.y0 + rnd() * (pk.y1 - pk.y0);
       if (cellFree(x, y)) props.push({ kind: 'pine', x, y, solid: true, r: 0.5 });
     }
+  // terrace tables in front of the bar
+  for (const [tx, ty] of [[145, 320], [148, 330], [143, 337], [148, 344]])
+    if (cellFree(tx, ty)) props.push({ kind: 'taula', x: tx, y: ty, solid: true, r: 0.7 });
+  // Centre Cultural: gardens behind, the square + park in front
+  for (let i = 0; i < 10; i++) {
+    const x = 342 + rnd() * 64, y = 324 + rnd() * 12;
+    if (cellFree(x, y)) props.push({ kind: rnd() < 0.6 ? 'plane' : 'bench', x, y, solid: true, r: 0.5 });
+  }
+  for (let i = 0; i < 12; i++) {
+    const x = 302 + rnd() * 30, y = 254 + rnd() * 52;
+    if (cellFree(x, y) && floor[(y | 0) * W + (x | 0)] === F.GRASS)
+      props.push({ kind: rnd() < 0.7 ? 'plane' : 'bench', x, y, solid: true, r: 0.5 });
+  }
+  for (const [bx, by] of [[344, 276], [374, 264], [404, 276], [358, 286], [390, 286]])
+    if (cellFree(bx, by)) props.push({ kind: rnd() < 0.6 ? 'bench' : 'paperera', x: bx, y: by, solid: true, r: 0.4 });
   // the real bus stops of the barri
   props.push({ kind: 'busstop', x: 300, y: 74.5,  solid: false, r: 0.3 });
   props.push({ kind: 'busstop', x: 360, y: 134,   solid: false, r: 0.3 });
@@ -283,6 +335,9 @@ const MAP = (() => {
   const portal  = { x: 107, y: 348 };               // forecourt of Crist Salvador
 
   const spawns = [
+    { x: 374, y: 276, r: 12, n: 3, t: 'gos' },      // Pl. de les Cultures
+    { x: 372, y: 226, r: 10, n: 2, t: 'diablot' },  // Pg. de Catalunya
+    { x: 316, y: 280, r: 10, n: 2, t: 'diablot' },  // the park
     { x: 500, y: 128, r: 12, n: 3, t: 'gos' },
     { x: 440, y: 192, r: 12, n: 2, t: 'diablot' },
     { x: 412, y: 68,  r: 14, n: 3, t: 'diablot' },
@@ -302,7 +357,9 @@ const MAP = (() => {
     { t: 'coca', x: 522, y: 190 }, { t: 'coca', x: 300, y: 70 }, { t: 'coca', x: 80, y: 348 },
     { t: 'coca', x: 225, y: 340 }, { t: 'coca', x: 60, y: 360 },
     { t: 'vi', x: 412, y: 130 }, { t: 'vi', x: 268, y: 60 }, { t: 'vi', x: 200, y: 300 }, { t: 'vi', x: 100, y: 410 },
+    { t: 'vi', x: 146, y: 325 },                      // a porró at the bar terrace
     { t: 'bales', x: 546, y: 100 }, { t: 'bales', x: 340, y: 60 }, { t: 'bales', x: 252, y: 250 },
+    { t: 'bales', x: 374, y: 290 }, { t: 'coca', x: 374, y: 330 },   // plaça + jardins del C. Cultural
     { t: 'bales', x: 160, y: 258 }, { t: 'bales', x: 40, y: 308 },
     { t: 'cartutxos', x: 80, y: 283 }, { t: 'cartutxos', x: 225, y: 312 }, { t: 'cartutxos', x: 135, y: 380 },
   ];
@@ -314,7 +371,9 @@ const MAP = (() => {
   }).concat(
     PLAZAS.map(p => ({ name: p.name, x: (p.x0 + p.x1) / 2, y: (p.y0 + p.y1) / 2 })),
     [{ name: 'Mercat Municipal', x: 516, y: 217 }, { name: 'Crist Salvador', x: 107, y: 326 },
-     { name: 'IES Pompeu Fabra', x: 225, y: 264 }, { name: 'Pavelló', x: 225, y: 326 }]);
+     { name: 'IES Pompeu Fabra', x: 225, y: 264 }, { name: 'Pavelló', x: 225, y: 326 },
+     { name: 'Ascensor', x: 30, y: 292 }, { name: 'Centre Cultural', x: 374, y: 307 },
+     { name: 'Pl. de les Cultures', x: 374, y: 276 }]);
 
   return { W, H, wall, floor, types, F, props, start, keySpot, portal, spawns, pickups, labels };
 })();

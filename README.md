@@ -110,6 +110,7 @@ survey data):
 | Av. del Camí Fondo + C. de Joan Maragall / Jacint Verdaguer / Vallirana / Torrelles / St. Llorenç d'Hortons / Castellví de Rosanes / Pou del Merli | the tree-lined grid of Camí Fondo |
 | Mercat Municipal · Rbla. de les Bòbiles | where you start |
 | Av. Fèlix Duran i Cañameras | the avenue between the barris, with the **IES Pompeu Fabra** and the sports pavilion (the key is in there) |
+| **Centre Cultural** (1995) + Pl. de les Cultures, at the end of **Pg. de Catalunya** | its five coloured roof panels rise over the clearing between the barris — gardens behind, square and park in front |
 | Pl. d'Isidre Clopas (recently re-urbanised, with its new trees) | the shotgun is here |
 | Pl. de Pompeu Fabra + church of **Crist Salvador** | the Devil's portal — endgame |
 | C. del Tenor Palet / Mestre Morera / Lluís de Requesens / Doctor Trueta / Ptge. de Buenos Aires | the polígon rows of Buenos Aires |
