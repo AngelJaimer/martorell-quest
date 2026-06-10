@@ -90,11 +90,51 @@ Want to add a place or change the lore? It's almost all in `js/data.js` —
 add an entry to `LANDMARKS` (set `stone: true` to make it a quest item) and
 the engine picks it up automatically.
 
+## 🔫 MARTODOOM — Episodi 1: Buenos Aires & Camí Fondo
+
+A second game lives in [`doom/`](doom/): a **Doom-style first-person shooter**
+set in the real southern barris of Martorell. Open `doom/index.html` and play.
+
+It runs on a hand-written **variable-height raycaster** (pure canvas, no
+build step, no assets — same philosophy as the Zelda-like): 1 grid cell =
+1 metre, buildings carry their own height, material and colour, so the
+five-storey 1962 brick rows of **Buenos Aires** loom over the two-storey
+pastel rowhouses of **Camí Fondo** exactly as they should.
+
+**Realism first.** The street plan, squares and landmarks are the real ones,
+laid out from documented sources (the shapes are careful approximations, not
+survey data):
+
+| Real place | In the game |
+|------------|-------------|
+| Av. del Camí Fondo + C. de Joan Maragall / Jacint Verdaguer / Vallirana / Torrelles / St. Llorenç d'Hortons / Castellví de Rosanes / Pou del Merli | the tree-lined grid of Camí Fondo |
+| Mercat Municipal · Rbla. de les Bòbiles | where you start |
+| Av. Fèlix Duran i Cañameras | the avenue between the barris, with the **IES Pompeu Fabra** and the sports pavilion (the key is in there) |
+| Pl. d'Isidre Clopas (recently re-urbanised, with its new trees) | the shotgun is here |
+| Pl. de Pompeu Fabra + church of **Crist Salvador** | the Devil's portal — endgame |
+| C. del Tenor Palet / Mestre Morera / Lluís de Requesens / Doctor Trueta / Ptge. de Buenos Aires | the polígon rows of Buenos Aires |
+
+Montserrat is on the horizon, the street you're on is named on screen, and
+**M** opens a labelled map of both barris. Trilingual (ES/CA/EN) with **L**.
+
+Controls: **WASD** move · **mouse / arrows** turn · **click / space** fire ·
+**1-3** weapons · **M** map · **R** restart.
+
+The lore continues the bridge legend: the Devil opens a portal in front of
+Crist Salvador and his imps overrun the southern barris. Find the pavilion
+key, then close the portal.
+
+> Want street-level accuracy? `doom/js/map.js` is fully declarative
+> (streets as polylines, buildings as rectangles with floors/colour/material).
+> Exporting building footprints for the two barris from OpenStreetMap and
+> translating them into those tables is the natural next step.
+
 ## ⚖️ Credits & licence
 
 Original code, art and audio, made with care. A **fan-made homage** to the town
-of Martorell and to Nintendo's *The Legend of Zelda* — **not official**, not
-affiliated with or endorsed by Nintendo, the Ajuntament de Martorell, SEAT, or
-any business depicted. Place depictions are stylised and for fun.
+of Martorell, to Nintendo's *The Legend of Zelda* and to id Software's *DOOM* —
+**not official**, not affiliated with or endorsed by Nintendo, id Software,
+the Ajuntament de Martorell, SEAT, or any business depicted. Place depictions
+are stylised and for fun.
 
 MIT licence — see [`LICENSE`](LICENSE).
