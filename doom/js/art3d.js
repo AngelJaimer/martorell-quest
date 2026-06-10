@@ -43,6 +43,12 @@ const ART3D = (() => {
     const floors = Math.max(1, Math.round(def.h / 3));
     const gy = f => hpx - (f + 1) * floorPx;                 // top y of storey f (0 = ground)
 
+    function signBand(y) {
+      g.fillStyle = 'rgba(245,240,225,.92)'; g.fillRect(0, y, MODULE_PX, 16);
+      g.fillStyle = '#2d2620'; g.font = 'bold 12px monospace'; g.textAlign = 'center';
+      g.fillText(def.sign, MODULE_PX / 2, y + 12);
+    }
+
     if (def.mat === 'brick') {
       // running-bond brick + light mortar
       g.fillStyle = shade(base, 0.86);
@@ -50,13 +56,33 @@ const ART3D = (() => {
         for (let x = (y / 8 % 2) * 12; x < MODULE_PX; x += 24) g.fillRect(x, y, 22, 6);
       g.fillStyle = 'rgba(255,255,255,.07)';
       for (let y = 6; y < hpx; y += 8) g.fillRect(0, y, MODULE_PX, 1);
-    } else if (def.mat === 'stucco') {
+    } else if (def.mat === 'stucco' || def.mat === 'bloc') {
       g.fillStyle = shade(base, 0.95);
       for (let i = 0; i < 90; i++) g.fillRect(rnd() * MODULE_PX, rnd() * hpx, 2 + rnd() * 3, 2);
       g.fillStyle = shade(base, 1.06);
       for (let i = 0; i < 60; i++) g.fillRect(rnd() * MODULE_PX, rnd() * hpx, 2, 2);
     } else if (def.mat === 'metal') {
+      // municipal sports hall: corrugated sheet, high glazing band, sliding doors
       for (let x = 0; x < MODULE_PX; x += 10) { g.fillStyle = x % 20 ? shade(base, 0.9) : shade(base, 1.05); g.fillRect(x, 0, 10, hpx); }
+      g.fillStyle = '#7e96b8'; g.fillRect(0, hpx * 0.18, MODULE_PX, hpx * 0.13);
+      g.strokeStyle = 'rgba(40,50,60,.5)'; g.lineWidth = 2;
+      for (let x = 12; x < MODULE_PX; x += 24) { g.beginPath(); g.moveTo(x, hpx * 0.18); g.lineTo(x, hpx * 0.31); g.stroke(); }
+      g.fillStyle = '#5a6670'; g.fillRect(30, hpx - 70, 70, 70); g.fillRect(156, hpx - 70, 70, 70);
+      g.fillStyle = 'rgba(255,255,255,.16)';
+      for (let y = hpx - 64; y < hpx; y += 8) { g.fillRect(32, y, 66, 2); g.fillRect(158, y, 66, 2); }
+      if (def.sign) signBand(hpx * 0.06);
+      return { lit: c, dark: darken(c) };
+    } else if (def.mat === 'obra') {
+      // tanca d'obra: white site-fence panels, blue rails, works notice
+      g.fillStyle = '#e8e6e0'; g.fillRect(0, 0, MODULE_PX, hpx);
+      g.fillStyle = '#cfccc4';
+      for (let x = 0; x < MODULE_PX; x += 32) g.fillRect(x, 0, 3, hpx);
+      g.fillStyle = '#2a5fa8'; g.fillRect(0, 0, MODULE_PX, 7); g.fillRect(0, hpx - 6, MODULE_PX, 6);
+      if (def.sign) {
+        g.fillStyle = '#b3552e'; g.font = 'bold 16px sans-serif'; g.textAlign = 'center';
+        g.fillText(def.sign, MODULE_PX / 2, hpx * 0.6);
+      }
+      return { lit: c, dark: darken(c) };
     } else if (def.mat === 'pines') {
       // forest edge: layered dark pines
       g.fillStyle = '#22381f'; g.fillRect(0, 0, MODULE_PX, hpx);
@@ -79,42 +105,59 @@ const ART3D = (() => {
     }
 
     if (def.mat === 'church') {
-      if (def.tower) {       // campanar: long slit windows + bells + cross
+      // Crist Salvador (1988): modern obra-vista brick parish architecture
+      g.fillStyle = shade(base, 0.88);
+      for (let y = 0; y < hpx; y += 7)
+        for (let x = (y / 7 % 2) * 10; x < MODULE_PX; x += 20) g.fillRect(x, y, 18, 5);
+      if (def.tower) {       // campanar: plain brick pillar, belfry opening, metal cross
         g.fillStyle = '#1d2630';
-        g.fillRect(MODULE_PX * 0.42, hpx * 0.08, MODULE_PX * 0.16, hpx * 0.16);
-        for (let i = 0; i < 3; i++) g.fillRect(MODULE_PX * (0.25 + i * 0.2), hpx * 0.45, 14, hpx * 0.3);
-        g.fillStyle = '#caa84a'; g.beginPath(); g.arc(MODULE_PX * 0.5, hpx * 0.13, 9, 0, 7); g.fill();
-        g.fillStyle = '#e8e2d2';
-        g.fillRect(MODULE_PX * 0.49, hpx * 0.0, 6, hpx * 0.05); g.fillRect(MODULE_PX * 0.45, hpx * 0.012, 26, 5);
-      } else {               // nau: portal arch + creu + rosassa
-        g.fillStyle = shade(def.c, 0.92); g.fillRect(0, hpx - 8, MODULE_PX, 8);
-        g.fillStyle = '#3a2d22';
-        g.beginPath(); g.arc(MODULE_PX / 2, hpx - 10, 34, Math.PI, 0); g.fill();
-        g.fillRect(MODULE_PX / 2 - 34, hpx - 10, 68, 10);
-        g.fillStyle = '#8a6b4a'; g.fillRect(MODULE_PX / 2 - 3, hpx - 64, 6, 54);
-        g.fillStyle = '#b3552e'; g.beginPath(); g.arc(MODULE_PX / 2, hpx * 0.3, 20, 0, 7); g.fill();
-        g.fillStyle = '#f3e9c8'; g.beginPath(); g.arc(MODULE_PX / 2, hpx * 0.3, 14, 0, 7); g.fill();
-        g.fillStyle = '#8a3320';
-        g.fillRect(MODULE_PX / 2 - 4, hpx * 0.3 - 13, 8, 26); g.fillRect(MODULE_PX / 2 - 13, hpx * 0.3 - 4, 26, 8);
-        for (const sx of [0.12, 0.88]) {
-          g.fillStyle = '#26303d'; g.fillRect(MODULE_PX * sx - 7, hpx * 0.35, 14, hpx * 0.4);
-        }
+        g.fillRect(MODULE_PX * 0.44, hpx * 0.1, MODULE_PX * 0.12, hpx * 0.13);
+        g.fillRect(MODULE_PX * 0.47, hpx * 0.38, MODULE_PX * 0.06, hpx * 0.45);
+        g.fillStyle = '#caa84a'; g.beginPath(); g.arc(MODULE_PX * 0.5, hpx * 0.16, 7, 0, 7); g.fill();
+        g.fillStyle = '#d8d4c8';
+        g.fillRect(MODULE_PX * 0.49, 2, 5, hpx * 0.06); g.fillRect(MODULE_PX * 0.46, hpx * 0.022, 21, 4);
+      } else {               // nau: concrete strip with tall glazing, canopy doors, plain cross
+        g.fillStyle = '#d8d2c4'; g.fillRect(MODULE_PX * 0.40, 0, MODULE_PX * 0.2, hpx);
+        g.fillStyle = '#3a4a66'; g.fillRect(MODULE_PX * 0.44, hpx * 0.08, MODULE_PX * 0.12, hpx * 0.5);
+        g.strokeStyle = 'rgba(220,220,210,.6)'; g.lineWidth = 2;
+        for (let y = hpx * 0.08; y < hpx * 0.58; y += 12) { g.beginPath(); g.moveTo(MODULE_PX * 0.44, y); g.lineTo(MODULE_PX * 0.56, y); g.stroke(); }
+        g.fillStyle = '#8a8478';
+        g.fillRect(MODULE_PX * 0.487, hpx * 0.02, 6, hpx * 0.14); g.fillRect(MODULE_PX * 0.455, hpx * 0.05, 22, 5);
+        g.fillStyle = '#d8d2c4'; g.fillRect(MODULE_PX * 0.30, hpx - 66, MODULE_PX * 0.4, 8);   // canopy
+        g.fillStyle = '#4a3526';
+        g.fillRect(MODULE_PX * 0.36, hpx - 58, MODULE_PX * 0.13, 58);
+        g.fillRect(MODULE_PX * 0.51, hpx - 58, MODULE_PX * 0.13, 58);
+        for (const sx of [0.12, 0.82]) { g.fillStyle = '#3a4a66'; g.fillRect(MODULE_PX * sx, hpx * 0.18, 18, 34); }
       }
       return { lit: c, dark: darken(c) };
     }
 
     // ---- generic housing: windows / balconies / ground floor ----
-    for (let f = 1; f < floors; f++) {
-      const y = gy(f) + 14;
-      for (let i = 0; i < 3; i++) {
-        const x = 26 + i * 82;
-        windowAt(g, x, y, 34, floorPx - 30, { persiana: true });
-        if (def.mat === 'brick' && f % 2 === 1) {     // balcony rail
-          g.fillStyle = 'rgba(20,24,28,.8)'; g.fillRect(x - 8, y + floorPx - 34, 50, 3);
-          for (let bx = x - 8; bx <= x + 42; bx += 6) g.fillRect(bx, y + floorPx - 34, 2, 12);
+    if (def.nowin) {
+      // municipal hall: continuous high strip windows only
+      for (let f = 1; f < floors; f++) {
+        g.fillStyle = '#26303d'; g.fillRect(10, gy(f) + 18, MODULE_PX - 20, 18);
+        g.strokeStyle = '#e8e0d0'; g.lineWidth = 2; g.strokeRect(10, gy(f) + 18, MODULE_PX - 20, 18);
+      }
+    } else
+      for (let f = 1; f < floors; f++) {
+        const y = gy(f) + 14;
+        if (def.mat === 'bloc') {                       // slab-edge accent band
+          g.fillStyle = def.accent || '#a85a38';
+          g.fillRect(0, gy(f) + 2, MODULE_PX, 6);
+        }
+        for (let i = 0; i < 3; i++) {
+          const x = 26 + i * 82;
+          windowAt(g, x, y, 34, floorPx - 30, { persiana: true });
+          if (def.mat === 'bloc') {                     // light aluminium balcony rails
+            g.fillStyle = 'rgba(225,228,230,.95)'; g.fillRect(x - 8, y + floorPx - 34, 50, 3);
+            for (let bx = x - 8; bx <= x + 42; bx += 5) g.fillRect(bx, y + floorPx - 34, 2, 12);
+          } else if (def.mat === 'brick' && f % 2 === 1) {
+            g.fillStyle = 'rgba(20,24,28,.8)'; g.fillRect(x - 8, y + floorPx - 34, 50, 3);
+            for (let bx = x - 8; bx <= x + 42; bx += 6) g.fillRect(bx, y + floorPx - 34, 2, 12);
+          }
         }
       }
-    }
     // ground floor
     const gyy = gy(0);
     if (def.shops) {
@@ -123,17 +166,29 @@ const ART3D = (() => {
       g.fillStyle = 'rgba(150,190,220,.25)'; g.fillRect(18, gyy + 24, 44, floorPx - 34);
       g.fillStyle = pick(['#a8503c', '#3c6e58', '#7a5a86']);
       g.fillRect(10, gyy + 8, 108, 14); g.fillRect(138, gyy + 8, 108, 14);   // awnings
-    } else {
+    } else if (!def.nowin) {
       g.fillStyle = '#4a3526'; g.fillRect(36, gyy + 18, 30, floorPx - 18);   // door
       g.fillStyle = '#caa84a'; g.fillRect(58, gyy + floorPx / 2, 3, 6);
-      windowAt(g, 110, gyy + 20, 34, floorPx - 40, { persiana: true });
-      windowAt(g, 186, gyy + 20, 34, floorPx - 40, { persiana: true });
+      if (def.mat === 'bloc') {                          // glazed entrance porch
+        g.fillStyle = '#26303d'; g.fillRect(30, gyy + 16, 42, floorPx - 16);
+        g.fillStyle = 'rgba(150,180,210,.3)'; g.fillRect(33, gyy + 20, 16, floorPx - 24);
+      }
+      if (def.garage) {                                  // persiana metàl·lica
+        g.fillStyle = '#9aa0a4'; g.fillRect(100, gyy + 22, 86, floorPx - 22);
+        g.fillStyle = 'rgba(60,65,70,.5)';
+        for (let yy = gyy + 26; yy < hpx; yy += 6) g.fillRect(100, yy, 86, 2);
+        windowAt(g, 206, gyy + 20, 34, floorPx - 40, { persiana: true });
+      } else {
+        windowAt(g, 110, gyy + 20, 34, floorPx - 40, { persiana: true });
+        windowAt(g, 186, gyy + 20, 34, floorPx - 40, { persiana: true });
+      }
     }
-    if (def.sign) {
-      g.fillStyle = 'rgba(245,240,225,.92)'; g.fillRect(0, gyy + 1, MODULE_PX, 16);
-      g.fillStyle = '#2d2620'; g.font = 'bold 12px monospace'; g.textAlign = 'center';
-      g.fillText(def.sign, MODULE_PX / 2, gyy + 13);
+    if (def.socle || def.mat === 'bloc') {               // tiled socle band
+      g.fillStyle = '#6b5648'; g.fillRect(0, hpx - 12, MODULE_PX, 12);
+      g.fillStyle = 'rgba(0,0,0,.15)';
+      for (let x = 0; x < MODULE_PX; x += 16) g.fillRect(x, hpx - 12, 1, 12);
     }
+    if (def.sign) signBand(gyy + 1);
     // top cornice
     g.fillStyle = shade(base, 0.8); g.fillRect(0, 0, MODULE_PX, 4);
     return { lit: c, dark: darken(c) };
@@ -187,7 +242,10 @@ const ART3D = (() => {
                   '#4f7a3a',            // GRASS
                   '#3f7a68',            // sports COURT
                   '#c9c9c4',            // road MARK
-                  '#8c7a5e'];           // RAMBLA (sauló)
+                  '#8c7a5e',            // RAMBLA (sauló)
+                  '#c9c9c4',            // CROSS_X (striped per-pixel in engine)
+                  '#c9c9c4',            // CROSS_Y
+                  '#b7b4ac'];           // CURB (granite)
     const pal = [];
     for (const hex of defs) {
       const n = parseInt(hex.slice(1), 16), r = n >> 16 & 255, gg = n >> 8 & 255, b = n & 255;
@@ -236,6 +294,36 @@ const ART3D = (() => {
     });
   }
   sprites.cars = ['#9a3b32', '#cfd2d6', '#3a4a6b', '#76777b', '#b8b39c', '#34503c'].map(carSprite);
+  sprites.sapling = sprite(56, 110, (g, w, h) => {   // newly planted street tree
+    g.fillStyle = '#3c4248'; g.fillRect(w / 2 - 8, h * 0.5, 2, h * 0.5); g.fillRect(w / 2 + 6, h * 0.5, 2, h * 0.5);
+    g.fillStyle = '#7a6448'; g.fillRect(w / 2 - 2, h * 0.38, 4, h * 0.62);
+    for (const [dx, dy, r, col] of [[0, -6, 14, '#6a9a4a'], [-9, 4, 10, '#5d8a40'], [9, 2, 10, '#74a854']])
+      ell(g, w / 2 + dx, h * 0.24 + dy, r, r * 0.9, col);
+  });
+  sprites.bins = sprite(160, 80, (g, w, h) => {      // contenidors de reciclatge
+    ['#2e7d4f', '#caa823', '#2f6fae'].forEach((col, i) => {
+      const x = 6 + i * 50;
+      g.fillStyle = col; g.fillRect(x, 22, 44, 50);
+      g.fillStyle = shade(col, 0.7); g.fillRect(x - 2, 12, 48, 12);
+      g.fillStyle = '#15181c'; g.fillRect(x + 10, 14, 24, 6);
+      ell(g, x + 8, 74, 5, 5, '#15181c'); ell(g, x + 36, 74, 5, 5, '#15181c');
+    });
+  });
+  sprites.moto = sprite(96, 70, (g, w, h) => {       // the inevitable parked scooter
+    ell(g, w * 0.22, h * 0.78, 11, 11, '#15181c'); ell(g, w * 0.8, h * 0.78, 11, 11, '#15181c');
+    ell(g, w * 0.22, h * 0.78, 4, 4, '#666'); ell(g, w * 0.8, h * 0.78, 4, 4, '#666');
+    g.fillStyle = '#8a2630';
+    g.fillRect(w * 0.34, h * 0.45, w * 0.36, h * 0.2);                    // body
+    g.beginPath(); g.moveTo(w * 0.3, h * 0.65); g.lineTo(w * 0.18, h * 0.3); g.lineTo(w * 0.26, h * 0.27); g.lineTo(w * 0.38, h * 0.6); g.fill();
+    g.fillStyle = '#2c2f33'; g.fillRect(w * 0.44, h * 0.36, w * 0.26, h * 0.1);   // seat
+    g.fillStyle = '#666'; g.fillRect(w * 0.16, h * 0.24, 12, 3);          // handlebar
+  });
+  sprites.paperera = sprite(36, 80, (g, w, h) => {
+    g.fillStyle = '#3c4248'; g.fillRect(w / 2 - 2, h * 0.45, 4, h * 0.55);
+    g.fillStyle = '#3a5e44'; g.fillRect(w / 2 - 10, 6, 20, h * 0.42);
+    g.fillStyle = 'rgba(0,0,0,.25)';
+    for (let y = 10; y < h * 0.44; y += 6) g.fillRect(w / 2 - 10, y, 20, 2);
+  });
   sprites.busstop = sprite(56, 120, (g, w, h) => {
     g.fillStyle = '#3c4248'; g.fillRect(w / 2 - 2, 0, 4, h);
     g.fillStyle = '#1c6e46'; g.fillRect(w / 2 - 22, 4, 44, 30);

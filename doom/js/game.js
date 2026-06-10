@@ -378,6 +378,10 @@
         case 'bench': spr = ART3D.sprites.bench; wM = 1.9; hM = 0.95; break;
         case 'car': spr = ART3D.sprites.cars[(pr.x * 7 + pr.y * 3 | 0) % ART3D.sprites.cars.length]; wM = 4.3; hM = 1.55; break;
         case 'busstop': spr = ART3D.sprites.busstop; wM = 1.3; hM = 2.8; break;
+        case 'sapling': spr = ART3D.sprites.sapling; wM = 2.4; hM = 4.4; break;
+        case 'bins': spr = ART3D.sprites.bins; wM = 3.4; hM = 1.7; break;
+        case 'moto': spr = ART3D.sprites.moto; wM = 2.0; hM = 1.45; break;
+        case 'paperera': spr = ART3D.sprites.paperera; wM = 0.55; hM = 1.2; break;
       }
       out.push({ x: pr.x, y: pr.y, spr, wM, hM, zM: 0 });
     }
@@ -407,7 +411,8 @@
   function buildMapBase() {
     const sc = 1.2;
     const c = ART3D.cv(MAP.W * sc | 0, MAP.H * sc | 0), g = c.getContext('2d');
-    const fc = ['#6b5d49', '#43454a', '#8d8a85', '#a06044', '#aaa291', '#4a6e38', '#3a6e60', '#b9b9b4', '#7e6e55'];
+    const fc = ['#6b5d49', '#43454a', '#8d8a85', '#a06044', '#aaa291', '#4a6e38', '#3a6e60',
+                '#b9b9b4', '#7e6e55', '#b9b9b4', '#b9b9b4', '#a3a09a'];
     for (let y = 0; y < MAP.H; y += 2) for (let x = 0; x < MAP.W; x += 2) {
       const w = MAP.wall[y * MAP.W + x];
       if (w) { const d = MAP.types[w]; g.fillStyle = d.mat === 'pines' ? '#243d26' : (d.c || '#888'); }

@@ -51,13 +51,13 @@ const ENGINE = (() => {
 
     /* ---- sky ---- */
     const skyW = sky.width, vw = skyW * (FOV / (Math.PI * 2));
-    let sxx = ((cam.a / (Math.PI * 2)) % 1 + 1) % 1 * skyW - vw / 2;
     const destH = Math.round(HOR / 0.9);
     bg.fillStyle = '#1c2240'; bg.fillRect(0, 0, RW, HOR);
-    for (let k = -1; k <= 1; k++) {
-      const off = sxx + k * skyW;
-      bg.drawImage(sky, off, 0, vw, sky.height, 0, 0, RW, destH);
-    }
+    const sx0 = (((cam.a - FOV / 2) / (Math.PI * 2)) % 1 + 1) % 1 * skyW;
+    const w1 = Math.min(skyW - sx0, vw);
+    bg.drawImage(sky, sx0, 0, w1, sky.height, 0, 0, Math.ceil(RW * w1 / vw), destH);
+    if (w1 < vw)
+      bg.drawImage(sky, 0, 0, vw - w1, sky.height, Math.floor(RW * w1 / vw), 0, Math.ceil(RW * (vw - w1) / vw), destH);
 
     /* ---- floor (per-pixel, fog per row) ---- */
     const rdx0 = dirX - planeX, rdy0 = dirY - planeY;
@@ -73,7 +73,9 @@ const ENGINE = (() => {
         const ix = fx | 0, iy = fy | 0;
         let c;
         if (ix >= 0 && iy >= 0 && ix < MAP.W && iy < MAP.H) {
-          const ft = MAP.floor[iy * MAP.W + ix];
+          let ft = MAP.floor[iy * MAP.W + ix];
+          if (ft === 9) ft = (ix & 1) ? 7 : 1;        // zebra stripes (E-W road)
+          else if (ft === 10) ft = (iy & 1) ? 7 : 1;  // zebra stripes (N-S road)
           c = pal[ft * 4 + (((ix * 0x9E37 ^ iy * 0x85EB) >> 3) & 3)];
         } else c = pal[0];
         fdata[o] = c[0] * nf + fr; fdata[o + 1] = c[1] * nf + fg; fdata[o + 2] = c[2] * nf + fb;
