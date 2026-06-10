@@ -1,0 +1,42 @@
+html, body {
+  margin: 0; padding: 0;
+  background: #0c0a10;
+  color: #d8d2c0;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+}
+#wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px;
+}
+h1 {
+  font-size: 22px; letter-spacing: 3px; color: #e3402e;
+  margin: 6px 0 10px; text-shadow: 0 2px 0 #3a0e0a;
+}
+h1 span { font-size: 13px; color: #b8a06a; letter-spacing: 1px; }
+#stage { position: relative; }
+canvas {
+  display: block;
+  width: min(960px, 96vw);
+  height: auto;
+  image-rendering: pixelated;
+  border: 3px solid #2a2230;
+  box-shadow: 0 0 40px rgba(200, 60, 30, .15);
+  cursor: crosshair;
+}
+#touchui button {
+  position: absolute;
+  background: rgba(30, 24, 36, .55);
+  color: #ffd24a;
+  border: 2px solid rgba(255, 210, 74, .5);
+  border-radius: 50%;
+  font: bold 16px 'Courier New', monospace;
+  touch-action: none;
+  user-select: none;
+}
+#t-fire { right: 14px; bottom: 16px; width: 76px; height: 76px; font-size: 30px; }
+#t-wpn  { right: 104px; bottom: 26px; width: 56px; height: 56px; font-size: 12px; }
+#t-map  { right: 14px; bottom: 106px; width: 56px; height: 56px; font-size: 11px; border-radius: 12px; }
+#help { font-size: 12px; color: #8a8474; margin: 10px 0 2px; text-align: center; }
+#tag { font-size: 11px; color: #5e594c; margin: 4px 0; text-align: center; }
+#tag a { color: #b8a06a; }
